@@ -2,20 +2,6 @@
 
 library(ggplot2)
 
-ctest<-function(dInc,p,quantil){
-m<-length(which(dInc!=0))
-n<-length(dInc)
-a<- sqrt(2*log(2*m));b<-a-((log(log(2*m))+log(4*pi))/(2*a))
-
-K<-mean(abs(rnorm(1000000))^p)
-x1<-mean(abs(dInc)^p)
-d1<-(x1/K)^(-1/p)
-
-tStatistik<-a*(max(abs(dInc)*d1)-b)
-return(tStatistik>=-log(-log(quantil)))
-
-}
-
 # n: number of observations
 # H: Hurst exponent
 # m: number of Monte-Carlo simulations
