@@ -4,7 +4,6 @@
 
 ctest<-function(dInc,p,quantil){
 m<-length(which(dInc!=0))
-n<-length(dInc)
 a<- sqrt(2*log(2*m));b<-a-((log(log(2*m))+log(4*pi))/(2*a))
 
 K<-mean(abs(rnorm(1000000))^p)
