@@ -1,0 +1,173 @@
+# R-Code to reproduce Figure 3
+
+# n: number of observations
+# m: number of Monte-Carlo simulations
+# H: Hurst exponent
+# p: power choosen for test statistic
+# pos: position of jump
+
+# Fixed jump position
+
+testPower<-function(n,m,H,p,pos){
+                                     
+a<- sqrt(2*log((n-1)))                                                                                 
+b<-a-((log(log((n-1)))+log(4*pi))/(2*a))
+
+grid<-(0:n)/n
+sigma<-1-(0.2*sin(3/4*pi*grid))                                       
+                                       
+data<-matrix(0,nrow=m,ncol=30)
+K<-mean(abs(rnorm(1000000))^p)                                                                          
+
+u<-(n-1)                                                              
+hn<-floor(u^(2/3))  
+temp<-floor(u/hn)                                                     
+                                                   
+l<- hn*temp
+
+
+H2 <- 2*H
+matcov <- matrix(0, n, n)
+for(i in (1:n)) {
+r <- 0.5*(abs(i)^H2 + abs(1:n)^H2 - abs(i-(1:n))^H2)
+r <- r/(n^H2)
+matcov[i, 1:n] <- r
+matcov[1:n,i] <- matcov[i,1:n]
+}
+L <- chol(matcov)
+
+
+
+
+for(j in 1:m){
+
+Z <- rnorm(n)
+fBm <- t(L) %*% Z
+fBm <- c(0, fBm)
+
+   for(k in 1:30){
+
+y<-numeric(n+1)
+y[(pos:(n+1))]<- n^(-(H-0.005)+(k-1)*0.005)*sqrt(2*log(n))
+observations<-sigma[1:(n-1)]*diff(fBm,difference=2)+diff(y,differences=2)
+
+
+A<-matrix(observations[1:l],nrow=temp,ncol=hn,byrow=T)
+x<-rowSums((abs(A)^p))
+x1<-sum(abs(observations[(l+1):length(observations)])^p)
+denominator<-(x/(hn*K))^(-1/p)
+denominator2<-(x1/((length(observations[(l+1):u]))*K))^(-1/p)
+data[j,k]<-a*(max(max(observations[(l+1):u]*denominator2),max(A*denominator))-b)
+       }
+    }
+return(data)
+ }
+
+
+n<-2000;m<-5000;H1<-0.7;H2<-0.3;p1<-0.9;p2<-1;pos<-2000;alpha<-2/3
+
+r1<-testPower(n,m,H1,p1,pos,alpha)
+r2<-testPower(n,m,H2,p2,pos,alpha)
+z1<-apply(r1>=-log(-log(0.95)),2,mean)
+z2<-apply(r2>=-log(-log(0.95)),2,mean)
+
+
+
+
+par(mfrow=c(1,2))
+grid1<-seq(-0.695,-0.55,0.005)
+grid2<-seq(-0.295,-0.15,0.005)
+plot(grid1[1:24],z1[1:24],type="l", xlab="-Gamma",ylab="Empirical Power",main="H=0.7,p=0.9 and n=2000")
+plot(grid2,z2,type="l", xlab="-Gamma",ylab="Empirical Power",main="H=0.3,p=1 and n=2000")
+
+# R-Code to reproduce Figure 3
+
+# n: number of observations
+# m: number of Monte-Carlo simulations
+# H: Hurst exponent
+# p: power choosen for test statistic
+# pos: position of jump
+
+
+# Random jump position
+
+testPowerRandom<-function(n,m,H,p){
+                                     
+a<- sqrt(2*log((n-1)))                                                                                 
+b<-a-((log(log((n-1)))+log(4*pi))/(2*a))
+
+grid<-(0:n)/n
+sigma<-1-(0.2*sin(3/4*pi*grid))                                       
+                                       
+data<-matrix(0,nrow=m,ncol=30)
+K<-mean(abs(rnorm(1000000))^p)                                                                          
+
+u<-(n-1)                                                              
+hn<-floor(u^(2/3))  
+temp<-floor(u/hn)                                                     
+                                                   
+l<- hn*temp
+pos<-sample(x=l,size=m, replace=T)
+
+
+
+H2 <- 2*H
+matcov <- matrix(0, n, n)
+for(i in (1:n)) {
+r <- 0.5*(abs(i)^H2 + abs(1:n)^H2 - abs(i-(1:n))^H2)
+r <- r/(n^H2)
+matcov[i, 1:n] <- r
+matcov[1:n,i] <- matcov[i,1:n]
+}
+L <- chol(matcov)
+
+
+
+
+for(j in 1:m){
+
+Z <- rnorm(n)
+fBm <- t(L) %*% Z
+fBm <- c(0, fBm)
+
+   for(k in 1:30){
+
+y<-numeric(n+1)
+y[(pos[j]:(n+1))]<- n^(-(H-0.005)+(k-1)*0.005)*sqrt(2*log(n))
+observations<-sigma[1:(n-1)]*diff(fBm,difference=2)+diff(y,differences=2)
+
+
+A<-matrix(observations[1:l],nrow=temp,ncol=hn,byrow=T)
+x<-rowSums((abs(A)^p))
+x1<-sum(abs(observations[(l+1):length(observations)])^p)
+denominator<-(x/(hn*K))^(-1/p)
+denominator2<-(x1/((length(observations[(l+1):u]))*K))^(-1/p)
+data[j,k]<-a*(max(max(observations[(l+1):u]*denominator2),max(A*denominator))-b)
+       }
+    }
+return(data)
+ }
+
+
+
+n<-2000;m<-5000;H1<-0.7;H2<-0.3;p1<-0.9;p2<-1;pos<-2000;alpha<-2/3
+
+r1<-testPowerRandom(n,m,H1,p1)
+r2<-testPowerRandom(n,m,H2,p2)
+z1<-apply(r1>=-log(-log(0.95)),2,mean)
+z2<-apply(r2>=-log(-log(0.95)),2,mean)
+
+
+
+
+par(mfrow=c(1,2))
+grid1<-seq(-0.695,-0.55,0.005)
+grid2<-seq(-0.295,-0.15,0.005)
+plot(grid1[1:24],z1[1:24],type="l", xlab="-Gamma",ylab="Empirical Power",main="H=0.7,p=0.9 and n=2000")
+plot(grid2,z2,type="l", xlab="-Gamma",ylab="Empirical Power",main="H=0.3,p=1 and n=2000")
+
+
+
+
+
+
