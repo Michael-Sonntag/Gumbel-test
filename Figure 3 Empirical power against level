@@ -64,10 +64,10 @@ return(data)
  }
 
 
-n<-2000;m<-5000;H1<-0.7;H2<-0.3;p1<-0.9;p2<-1;pos<-2000;alpha<-2/3
+n<-2000;m<-5000;H1<-0.7;H2<-0.3;p1<-0.9;p2<-1;pos<-2000
 
-r1<-testPower(n,m,H1,p1,pos,alpha)
-r2<-testPower(n,m,H2,p2,pos,alpha)
+r1<-testPower(n,m,H1,p1,pos)
+r2<-testPower(n,m,H2,p2,pos)
 z1<-apply(r1>=-log(-log(0.95)),2,mean)
 z2<-apply(r2>=-log(-log(0.95)),2,mean)
 
